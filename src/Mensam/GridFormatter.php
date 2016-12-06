@@ -21,16 +21,10 @@ namespace Mensam;
  */
 interface GridFormatter{
 
-	/**
-	 * Method generated html grid
-	 *
-	 * @param Column[] $columns - columns name
-	 * @param mixed[] $records - records list
-	 * @param int $totalCount - max records count
-	 * @param int $limit - count records on page
-	 * @param int $page - current pag number
-	 * @param int $sort index column to sort
-	 */
-	public function render($columns,$records,$totalCount,$limit,$page,$sort);
+    /**
+     * @param GridRender $gridRender
+     * @return string
+     */
+	public function render(GridRender $gridRender);
 
 }

@@ -23,6 +23,9 @@ use Mensam\Formatter\BasicColumnFormatter;
  */
 class Column{
 
+    const ASC_SORT='asc';
+    const DESC_SORT='desc';
+    const NOT_SORT=null;
 	/**
 	 * List of id.
 	 *
@@ -51,7 +54,12 @@ class Column{
 	 */
 	private $sortKeys;
 
-	/**
+    /**
+     * @var string
+     */
+    private $sortOrder;
+
+    /**
 	 * Constructor
 	 *
 	 * @param mixed $keys list of id for column or one element
@@ -122,7 +130,22 @@ class Column{
 		return !empty($this->sortKeys);
 	}
 
-	/**
+    /**
+     * @param string $sortOrder
+     */
+	public function setSortOrder($sortOrder){
+	    $this->sortOrder=$sortOrder;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSortOrder()
+    {
+        return $this->sortOrder;
+    }
+
+    /**
 	 * Get label of column
 	 *
 	 * @return string

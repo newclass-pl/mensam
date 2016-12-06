@@ -19,157 +19,195 @@ namespace Mensam;
  * @package Mensam
  * @author Michal Tomczak (michal.tomczak@newclass.pl)
  */
-class GridBuilder{
+class GridBuilder
+{
 
     /**
      * @var GridFormatter
      */
-	private $formatter;
+    private $formatter;
 
     /**
      * @var GridDataManager
      */
-	private $dataManager;
+    private $dataManager;
 
     /**
      * @var int
      */
-	private $limit=10;
+    private $limit = 10;
 
     /**
      * @var int
      */
-	private $page=1;
+    private $page = 1;
 
     /**
      * @var Column[]
      */
-	private $columns=[];
+    private $columns = [];
 
-	/**
-	 * @var Request $request
-	 */
-	private $request;
+    /**
+     * @var Request $request
+     */
+    private $request;
+    /**
+     * @var GridRender
+     */
+    private $render;
 
 
-	public function setRequest(Request $request){
-	    $this->request=$request;
+    public function setRequest(Request $request)
+    {
+        $this->request = $request;
     }
 
-	/**
-	 * Set formatter with html rule pattern
-	 *
-	 * @param GridFormatter $formatter
-	 */
-	public function setFormatter(GridFormatter $formatter){
-		$this->formatter=$formatter;
-	}
+    /**
+     * Set formatter with html rule pattern
+     *
+     * @param GridFormatter $formatter
+     */
+    public function setFormatter(GridFormatter $formatter)
+    {
+        $this->formatter = $formatter;
+    }
 
-	/**
-	 * Set formatter with html rule pattern
-	 *
-	 * @param GridDataManager $dataManager
-	 */
-	public function setDataManager(GridDataManager $dataManager){
-		$this->dataManager=$dataManager;
-	}
+    /**
+     * Set formatter with html rule pattern
+     *
+     * @param GridDataManager $dataManager
+     */
+    public function setDataManager(GridDataManager $dataManager)
+    {
+        $this->dataManager = $dataManager;
+    }
 
-	/**
-	 * Get DataManager
-	 *
-	 * @return GridDataManager
-	 */
-	public function getDataManager(){
-		return $this->dataManager;
-	}
+    /**
+     * Get DataManager
+     *
+     * @return GridDataManager
+     */
+    public function getDataManager()
+    {
+        return $this->dataManager;
+    }
 
-	/**
-	 * Get columns data
-	 *
-	 * @return Column[]
-	 */
-	public function getColumns(){
-		return $this->columns;
-	}
+    /**
+     * Get columns data
+     *
+     * @return Column[]
+     */
+    public function getColumns()
+    {
+        return $this->columns;
+    }
 
-	/**
-	 * Get records
-	 *
-	 * @return mixed[]
-	 */
-	public function getRecords(){
-		$query=$this->request->getQuery();
-		$sort=null;
-		if(isset($query['sort']) && isset($this->columns[$query['sort']])){
-			$sort=$this->columns[$query['sort']]->getSortKeys();
-		}
-		if (isset($query['page'])) {
-			$this->page=$query['page'];
-		}
+    /**
+     * Get records
+     *
+     * @return mixed[]
+     */
+    public function getRecords()
+    {
+        if(!$this->isConfirmed()){
+            $this->submit();
+        }
+        return $this->render->getRecords();
+    }
 
+    /**
+     * Get total count records
+     *
+     * @return int
+     */
+    public function getTotalCount()
+    {
+        return $this->dataManager->getTotalCount();
+    }
 
-		return $this->dataManager->getRecords($this->limit,$this->page,$sort);
-	}
+    /**
+     * Set limit records on single page
+     *
+     * @param int $limit - items on page
+     */
+    public function setLimit($limit)
+    {
+        $this->limit = $limit;
+    }
 
-	/**
-	 * Get total count records
-	 *
-	 * @return int
-	 */
-	public function getTotalCount(){
-		return $this->dataManager->getTotalCount();
-	}
+    /**
+     * Set current page
+     *
+     * @param int $page - current page
+     */
+    public function setPage($page)
+    {
+        $this->page = $page;
+    }
 
-	/**
-	 * Set limit records on single page
-	 *
-	 * @param int $limit - items on page
-	 */
-	public function setLimit($limit){
-		$this->limit=$limit;
-	}
+    /**
+     * Add column
+     *
+     * @param Column $column
+     */
+    public function addColumn(Column $column)
+    {
+        $this->columns[] = $column;
+    }
 
-	/**
-	 * Set current page
-	 *
-	 * @param int $page - current page
-	 */
-	public function setPage($page){
-		$this->page=$page;
-	}
+    /**
+     * Generate html grid string
+     *
+     * @return string with html form
+     */
+    public function render()
+    {
+        if(!$this->isConfirmed()){
+            $this->submit();
+        }
 
-	/**
-	 * Add column
-	 *
-	 * @param Column $column
-	 */
-	public function addColumn(Column $column){
-		$this->columns[]=$column;
-	}
+        return $this->formatter->render($this->render);
+    }
 
-	/**
-	 * Generate html grid string
-	 *
-	 * @return string with html form
-	 */
-	public function render(){
-		$sort=0;
-		$query=$this->request->getQuery();
-		if(isset($query['sort']) && isset($this->columns[$query['sort']])){
-			$sort=$query['sort'];
-		}
+    public function isConfirmed(){
+        return $this->render!==null;
+    }
+    /**
+     * Submit data.
+     */
+    public function submit(){
+        $sortColumns=[];
+        $query = $this->request->getQuery();
+        $sorts=[];
+        if (isset($query['sort'])) {
+            foreach ($query['sort'] as $sort) {
+                list($columnIndex, $methodSort) = explode(';', $sort);
+                $column = $this->columns[$columnIndex];
+                $column->setSortOrder($methodSort);//TODO check value is valid
+                $sortColumns[]=$columnIndex;
+                foreach($column->getSortKeys() as $sortKey){
+                    if(!isset($sorts[$sortKey])){
+                        $sorts[$sortKey]=$methodSort;
+                    }
+                }
+            }
+        }
 
-		return $this->formatter->render($this->columns
-			,$this->getRecords()
-			,$this->dataManager->getTotalCount(),$this->limit,$this->page,$sort);
-	}
+        if(isset($query['page'])){
+            $this->page=$query['page'];
+        }
+        $records=$this->dataManager->getRecords($this->limit, $this->page, $sorts);
+        $this->render=new GridRender($this->columns, $records,
+            $this->dataManager->getTotalCount(), $this->limit, $this->page,$sortColumns);
+    }
 
 
     /**
      * @return string
      */
-	public function __toString(){
-		return $this->render();
-	}
+    public function __toString()
+    {
+        return $this->render();
+    }
 
 }

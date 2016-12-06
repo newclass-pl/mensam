@@ -14,7 +14,11 @@
 
 namespace Mensam;
 
-
+/**
+ * Interface Request
+ * @package Mensam
+ * @author Michal Tomczak (michal.tomczak@newclass.pl)
+ */
 interface Request
 {
 

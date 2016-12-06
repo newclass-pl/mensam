@@ -16,6 +16,7 @@ namespace Mensam\Formatter;
 
 use Mensam\Column;
 use Mensam\GridFormatter;
+use Mensam\GridRender;
 
 /**
  * Formatter for GridBuilder
@@ -43,24 +44,19 @@ class Bootstrap3Formatter implements GridFormatter
     /**
      * Method generated html grid
      *
-     * @param Column[] $columns
-     * @param mixed[] $records
-     * @param int $totalCount
-     * @param int $limit
-     * @param int $page
-     * @param int $sort
+     * @param GridRender $render
      * @return string
      */
-    public function render($columns, $records, $totalCount, $limit, $page, $sort)
+    public function render(GridRender $render)
     {
         $template = '';
         if ($this->responsive) {
             $template .= '<div class="table-responsive">';
         }
         $template .= '<table class="' . $this->getTableClass() . '">';
-        $template .= $this->renderHead($columns, $records, $totalCount, $limit, $page, $sort);
-        $template .= $this->renderBody($columns, $records, $totalCount, $limit, $page, $sort);
-        $template .= $this->renderFoot($columns, $records, $totalCount, $limit, $page, $sort);
+        $template .= $this->renderHead($render);
+        $template .= $this->renderBody($render);
+        $template .= $this->renderFoot($render);
         $template .= '</table>';
 
         if ($this->responsive) {
@@ -95,19 +91,25 @@ class Bootstrap3Formatter implements GridFormatter
     }
 
     /**
-     * @param Column[] $columns
-     * @param mixed[] $records
-     * @param int $totalCount
-     * @param int $limit
-     * @param int $page
-     * @param int $sort
+     * @param GridRender $render
      * @return string
      */
-    public function renderHead($columns, $records, $totalCount, $limit, $page, $sort)
+    public function renderHead(GridRender $render)
     {
         $template = '<thead><tr>';
-        foreach ($columns as $column) {
-            $template .= '<th>' . $column->getLabel() . '</th>';
+        foreach ($render->getColumns() as $kColumn => $column) {
+            $template .= '<th>';
+            if ($column->isSortable()) {
+                $template .= '<a href="'.$render->getSortURL($kColumn) . '">';
+            }
+            $template .= $column->getLabel();
+
+            if ($column->isSortable()) {
+                $sortIcon=$this->getSortIcon($column->getSortOrder());
+                $template .= '<span class="glyphicons '.$sortIcon.'"></span></a>';
+            }
+
+            $template .= '</th>';
         }
         $template .= '</tr></thead>';
 
@@ -115,20 +117,15 @@ class Bootstrap3Formatter implements GridFormatter
     }
 
     /**
-     * @param Column[] $columns
-     * @param mixed[] $records
-     * @param int $totalCount
-     * @param int $limit
-     * @param int $page
-     * @param int $sort
+     * @param GridRender $render
      * @return string
      */
-    public function renderBody($columns, $records, $totalCount, $limit, $page, $sort)
+    public function renderBody(GridRender $render)
     {
         $template = '<tbody>';
-        foreach ($records as $record) {
+        foreach ($render->getRecords() as $record) {
             $template .= '<tr>';
-            foreach ($columns as $column) {
+            foreach ($render->getColumns() as $column) {
                 $template .= $this->renderRecord($column, $record);
             }
             $template .= '</tr>';
@@ -164,25 +161,21 @@ class Bootstrap3Formatter implements GridFormatter
     }
 
     /**
-     * @param Column[] $columns
-     * @param mixed[] $records
-     * @param int $totalCount
-     * @param int $limit
-     * @param int $page
-     * @param int $sort
+     * @param GridRender $render
      * @return string
      */
-    public function renderPagination($columns, $records, $totalCount, $limit, $page, $sort)
+    public function renderPagination(GridRender $render)
     {
+        $page=$render->getPage();
         $template = '<nav><ul class="pagination">';
         if ($page === 1) {
             $template .= '<li class="disabled"><a href="#" aria-label="Previous"><span aria-hidden="true">«</span></a></li>';
         } else {
-            $template .= '<li><a href="?page=' . ($page - 1) .
+            $template .= '<li><a href="' . $render->getPaginationURL($page - 1) .
                 '" aria-label="Previous"><span aria-hidden="true">«</span></a></li>';
         }
 
-        $maxPage = $limit !== null ? $totalCount / $limit : 1;
+        $maxPage = $render->getMaxPage();
         $offset = 4;
         $startPage = $page - $offset;
         if ($startPage < 1) {
@@ -195,18 +188,19 @@ class Bootstrap3Formatter implements GridFormatter
 
         for ($i = $startPage; $i <= $endPage; $i++) {
             if ($i === $page) {
-                $template .= '<li class="active"><a href="#">' . $page . '</a></li>';
+                $template .= '<li class="active"><a href="#">' . $i . '</a></li>';
                 continue;
             }
 
-            $template .= '<li><a href="?page=' . $page . '">' . $page . '</a></li>';
+            $template .= '<li><a href="' .$render->getPaginationURL($i) . '">' . $i . '</a></li>';
 
         }
 
         if ($page === $maxPage) {
             $template .= '<li class="disabled"><a href="#" aria-label="Next"><span aria-hidden="true">»</span></a></li>';
         } else {
-            $template .= '<li class="disabled"><a href="?page='.($page+1).'" aria-label="Next"><span aria-hidden="true">»</span></a></li>';
+            $template .= '<li><a href="' . $render->getPaginationURL($page + 1) .
+                '" aria-label="Next"><span aria-hidden="true">»</span></a></li>';
         }
 
         $template .= '</ul></nav>';
@@ -214,13 +208,33 @@ class Bootstrap3Formatter implements GridFormatter
         return $template;
     }
 
-    public function renderFoot($columns, $records, $totalCount, $limit, $page, $sort)
+    /**
+     * @param GridRender $render
+     * @return string
+     */
+    public function renderFoot(GridRender $render)
     {
         $template = '<tfoot>';
-        $template .= '<tr><td colspan="' . count($columns) . '">' .
-            $this->renderPagination($columns, $records, $totalCount, $limit, $page, $sort) . '</td>';
+        $template .= '<tr><td colspan="' . count($render->getColumns()) . '" class="text-center">' .
+            $this->renderPagination($render) . '</td>';
         $template .= '</tfoot>';
         return $template;
+    }
+
+    /**
+     * @param string $sortOrder
+     * @return string
+     */
+    private function getSortIcon($sortOrder)
+    {
+        if($sortOrder==='asc'){
+            return 'glyphicons-sort-by-attributes';
+        }
+        else if($sortOrder==='desc'){
+            return 'glyphicons-sort-by-attributes-alt';
+        }
+
+        return 'glyphicons-sorting';
     }
 
 }
