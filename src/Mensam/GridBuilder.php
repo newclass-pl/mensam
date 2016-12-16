@@ -77,7 +77,7 @@ class GridBuilder
      *
      * @param GridDataManager $dataManager
      */
-    public function setDataManager(GridDataManager $dataManager)
+    public function setDataManager(GridDataManager $dataManager=null)
     {
         $this->dataManager = $dataManager;
     }
