@@ -23,7 +23,7 @@ interface Request
 {
 
     /**
-     * @return array
+     * @return string[]
      */
     public function getQuery();
 

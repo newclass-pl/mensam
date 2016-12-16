@@ -55,7 +55,7 @@ class GridRender
      * @param int $page
      * @param int[] $sortColumns
      */
-    public function __construct($columns, $records, $totalCount, $limit, $page,$sortColumns)
+    public function __construct($columns, $records, $totalCount, $limit, $page, $sortColumns)
     {
         $this->columns = $columns;
         $this->records = $records;
@@ -127,7 +127,7 @@ class GridRender
      */
     public function getSortURL($indexColumn)
     {
-        return $this->getURL($this->getPage(),$indexColumn);
+        return $this->getURL($this->getPage(), $indexColumn);
     }
 
     /**
@@ -136,7 +136,7 @@ class GridRender
      */
     public function getPaginationURL($page)
     {
-        return $this->getURL($page,null);
+        return $this->getURL($page, null);
     }
 
     /**
@@ -144,13 +144,13 @@ class GridRender
      * @param int $indexColumn
      * @return string
      */
-    private function getURL($page,$indexColumn)
+    private function getURL($page, $indexColumn)
     {
         $url = '?page=' . $page;
         $addColumn = $indexColumn !== null;
         foreach ($this->getSortColumns() as $sortColumn) {
-            $column=$this->columns[$sortColumn];
-            $sortOrder=$column->getSortOrder();
+            $column = $this->columns[$sortColumn];
+            $sortOrder = $column->getSortOrder();
             if ($indexColumn == $sortColumn) {
                 $addColumn = false;
                 $sortOrder = $this->shiftSortOrder($sortOrder);

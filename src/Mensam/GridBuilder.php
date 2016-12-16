@@ -57,7 +57,10 @@ class GridBuilder
     private $render;
 
 
-    public function setRequest(Request $request)
+    /**
+     * @param Request $request
+     */
+    public function setRequest(Request $request = null)
     {
         $this->request = $request;
     }
@@ -67,7 +70,7 @@ class GridBuilder
      *
      * @param GridFormatter $formatter
      */
-    public function setFormatter(GridFormatter $formatter)
+    public function setFormatter(GridFormatter $formatter = null)
     {
         $this->formatter = $formatter;
     }
@@ -77,7 +80,7 @@ class GridBuilder
      *
      * @param GridDataManager $dataManager
      */
-    public function setDataManager(GridDataManager $dataManager=null)
+    public function setDataManager(GridDataManager $dataManager = null)
     {
         $this->dataManager = $dataManager;
     }
@@ -109,7 +112,7 @@ class GridBuilder
      */
     public function getRecords()
     {
-        if(!$this->isConfirmed()){
+        if (!$this->isConfirmed()) {
             $this->submit();
         }
         return $this->render->getRecords();
@@ -162,43 +165,47 @@ class GridBuilder
      */
     public function render()
     {
-        if(!$this->isConfirmed()){
+        if (!$this->isConfirmed()) {
             $this->submit();
         }
 
         return $this->formatter->render($this->render);
     }
 
-    public function isConfirmed(){
-        return $this->render!==null;
+    public function isConfirmed()
+    {
+        return $this->render !== null;
     }
+
     /**
      * Submit data.
      */
-    public function submit(){
-        $sortColumns=[];
+    public function submit()
+    {
+        $sortColumns = [];
         $query = $this->request->getQuery();
-        $sorts=[];
+        $sorts = [];
         if (isset($query['sort'])) {
             foreach ($query['sort'] as $sort) {
                 list($columnIndex, $methodSort) = explode(';', $sort);
                 $column = $this->columns[$columnIndex];
                 $column->setSortOrder($methodSort);//TODO check value is valid
-                $sortColumns[]=$columnIndex;
-                foreach($column->getSortKeys() as $sortKey){
-                    if(!isset($sorts[$sortKey])){
-                        $sorts[$sortKey]=$methodSort;
+                $sortColumns[] = $columnIndex;
+                foreach ($column->getSortKeys() as $sortKey) {
+                    if (!isset($sorts[$sortKey])) {
+                        $sorts[$sortKey] = $methodSort;
                     }
                 }
             }
         }
 
-        if(isset($query['page'])){
-            $this->page=$query['page'];
+        if (isset($query['page'])) {
+            $this->page = $query['page'];
         }
-        $records=$this->dataManager->getRecords($this->limit, $this->page, $sorts);
-        $this->render=new GridRender($this->columns, $records,
-            $this->dataManager->getTotalCount(), $this->limit, $this->page,$sortColumns);
+        $records = $this->dataManager->getRecords($this->limit, $this->page, $sorts);
+        $this->render =
+            new GridRender($this->columns, $records, $this->dataManager->getTotalCount(), $this->limit, $this->page,
+                $sortColumns);
     }
 
 

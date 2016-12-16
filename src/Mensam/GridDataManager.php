@@ -19,23 +19,24 @@ namespace Mensam;
  * @package Mensam
  * @author Michal Tomczak (michal.tomczak@newclass.pl)
  */
-interface GridDataManager{
+interface GridDataManager
+{
 
-	/**
-	 * Get records for single page
-	 *
-	 * @param int $limit - count record on page
-	 * @param int $page - current page
-	 * @param string $sort - sort by column
-	 * @return mixed[] - records
-	 */
-	public function getRecords($limit,$page,$sort=null);
+    /**
+     * Get records for single page
+     *
+     * @param int $limit - count record on page
+     * @param int $page - current page
+     * @param string $sort - sort by column
+     * @return mixed[] - records
+     */
+    public function getRecords($limit, $page, $sort = null);
 
-	/**
-	 * Get total count records
-	 *
-	 * @return int - total count records
-	 */
-	public function getTotalCount();
-	
+    /**
+     * Get total count records
+     *
+     * @return int - total count records
+     */
+    public function getTotalCount();
+
 }

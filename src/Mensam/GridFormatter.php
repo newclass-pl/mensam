@@ -19,12 +19,13 @@ namespace Mensam;
  * @package Mensam
  * @author Michal Tomczak (michal.tomczak@newclass.pl)
  */
-interface GridFormatter{
+interface GridFormatter
+{
 
     /**
      * @param GridRender $gridRender
      * @return string
      */
-	public function render(GridRender $gridRender);
+    public function render(GridRender $gridRender);
 
 }

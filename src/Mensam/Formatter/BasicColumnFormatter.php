@@ -21,13 +21,15 @@ use Mensam\ColumnFormatter;
  * @package Mensam
  * @author Michal Tomczak (michal.tomczak@newclass.pl)
  */
-class BasicColumnFormatter implements ColumnFormatter{
+class BasicColumnFormatter implements ColumnFormatter
+{
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function render($data){
-		return htmlspecialchars(trim(implode(' ',$data)));
-	}
+    /**
+     * {@inheritdoc}
+     */
+    public function render($data)
+    {
+        return htmlspecialchars(trim(implode(' ', $data)));
+    }
 
 }

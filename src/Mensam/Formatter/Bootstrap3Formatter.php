@@ -100,13 +100,13 @@ class Bootstrap3Formatter implements GridFormatter
         foreach ($render->getColumns() as $kColumn => $column) {
             $template .= '<th>';
             if ($column->isSortable()) {
-                $template .= '<a href="'.$render->getSortURL($kColumn) . '">';
+                $template .= '<a href="' . $render->getSortURL($kColumn) . '">';
             }
             $template .= $column->getLabel();
 
             if ($column->isSortable()) {
-                $sortIcon=$this->getSortIcon($column->getSortOrder());
-                $template .= '<span class="glyphicons '.$sortIcon.'"></span></a>';
+                $sortIcon = $this->getSortIcon($column->getSortOrder());
+                $template .= '<span class="glyphicons ' . $sortIcon . '"></span></a>';
             }
 
             $template .= '</th>';
@@ -166,7 +166,7 @@ class Bootstrap3Formatter implements GridFormatter
      */
     public function renderPagination(GridRender $render)
     {
-        $page=$render->getPage();
+        $page = $render->getPage();
         $template = '<nav><ul class="pagination">';
         if ($page === 1) {
             $template .= '<li class="disabled"><a href="#" aria-label="Previous"><span aria-hidden="true">«</span></a></li>';
@@ -192,7 +192,7 @@ class Bootstrap3Formatter implements GridFormatter
                 continue;
             }
 
-            $template .= '<li><a href="' .$render->getPaginationURL($i) . '">' . $i . '</a></li>';
+            $template .= '<li><a href="' . $render->getPaginationURL($i) . '">' . $i . '</a></li>';
 
         }
 
@@ -227,11 +227,12 @@ class Bootstrap3Formatter implements GridFormatter
      */
     private function getSortIcon($sortOrder)
     {
-        if($sortOrder==='asc'){
+        if ($sortOrder === 'asc') {
             return 'glyphicons-sort-by-attributes';
-        }
-        else if($sortOrder==='desc'){
-            return 'glyphicons-sort-by-attributes-alt';
+        } else {
+            if ($sortOrder === 'desc') {
+                return 'glyphicons-sort-by-attributes-alt';
+            }
         }
 
         return 'glyphicons-sorting';
