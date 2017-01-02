@@ -202,9 +202,14 @@ class GridBuilder
         if (isset($query['page'])) {
             $this->page = $query['page'];
         }
-        $records = $this->dataManager->getRecords($this->limit, $this->page, $sorts);
+        $records = [];
+        $totalCount=0;
+        if($this->dataManager){
+            $records=$this->dataManager->getRecords($this->limit, $this->page, $sorts);
+            $totalCount=$this->dataManager->getTotalCount();
+        }
         $this->render =
-            new GridRender($this->columns, $records, $this->dataManager->getTotalCount(), $this->limit, $this->page,
+            new GridRender($this->columns, $records, $totalCount, $this->limit, $this->page,
                 $sortColumns);
     }
 
